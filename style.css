@@ -1,0 +1,114 @@
+@font-face {
+  font-weight: 500;
+  font-family: "Muller";
+  font-style: normal;
+  src: url(./fonts/MullerMedium.woff2) format("woff2"),
+    url(./fonts/MullerMedium.woff) format("woff");
+}
+
+@font-face {
+  font-weight: 700;
+  font-family: "Muller";
+  font-style: normal;
+  src: url(./fonts/MullerBold.woff2) format("woff2"),
+    url(./fonts/MullerBold.woff) format("woff");
+}
+
+@font-face {
+  font-weight: 400;
+  font-family: "Muller";
+  font-style: normal;
+  src: url(./fonts/MullerRegular.woff2) format("woff2"),
+    url(./fonts/MullerRegular.woff) format("woff");
+}
+
+body {
+  background: #e5e5e5;
+  font-family: "Muller", sans-serif;
+  width: 100vw;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
+
+.main-wrapper {
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.add-todo {
+  display: inline-flex;
+  align-items: center;
+}
+
+.todo-priority,
+.add-todo-button {
+  margin-left: 20px;
+  height: 35px;
+}
+
+.add-todo-input input,
+.todo-priority select,
+.add-todo-button button,
+#tasks-sort-button {
+  font-family: inherit;
+  font-weight: 400;
+  line-height: 1.5;
+  margin: 0;
+  height: 100%;
+  color: #212529;
+  border: 1px solid;
+  border-radius: 8px;
+}
+
+.add-todo-input input {
+  width: 30vw;
+  height: 33px;
+  padding-left: 10px;
+}
+
+.todo-menu {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.todo-filters {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.todo-filters li {
+  display: inline;
+  margin-right: 20px;
+}
+
+.todo-filter {
+  display: flex;
+  align-items: center;
+}
+
+.todo-filter label {
+  margin-left: 10px;
+  font-family: inherit;
+  font-weight: 400;
+  line-height: 1.5;
+  font-size: 13.3px;
+  color: #212529;
+}
+
+.checkbox {
+  margin: 0px;
+}
+
+.tasks-sort {
+  margin: 0 0 0 auto;
+}
+
+#tasks-sort-button:hover,
+.add-todo-button button:hover {
+  background-color: antiquewhite;
+}
