@@ -112,3 +112,50 @@ body {
 .add-todo-button button:hover {
   background-color: antiquewhite;
 }
+
+.todos-wrapper {
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.todos-wrapper h2 {
+  text-align: center;
+}
+
+.todos-list {
+  list-style-type: none;
+  padding-left: 0px;
+}
+
+.todo-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+  color: #212529;
+  border: 1px solid;
+  border-radius: 8px;
+}
+
+.todo-info {
+  color: #212529;
+  margin-left: 15px;
+}
+
+.todo-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-right: 15px;
+}
+
+.todo-buttons button {
+  background-color: white;
+  border: none;
+  text-decoration: none;
+}
+
+.todo-buttons button:hover {
+  color: rgb(87, 60, 24);
+}
