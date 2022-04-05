@@ -11,42 +11,6 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
     />
-
-    <script language="javascript" type="text/javascript">
-      let d = new Date();
-      let day = new Array(
-        "Воскресенье",
-        "Понедельник",
-        "Вторник",
-        "Среда",
-        "Четверг",
-        "Пятница",
-        "Суббота"
-      );
-      let month = new Array(
-        "января",
-        "февраля",
-        "марта",
-        "апреля",
-        "мая",
-        "июня",
-        "июля",
-        "августа",
-        "сентября",
-        "октября",
-        "ноября",
-        "декабря"
-      );
-      let TODAY =
-        day[d.getDay()] +
-        " " +
-        d.getDate() +
-        " " +
-        month[d.getMonth()] +
-        " " +
-        d.getFullYear() +
-        " г.";
-    </script>
   </head>
 
   <body>
@@ -116,7 +80,9 @@
           </ul>
         </div>
         <div class="tasks-sort">
-          <button id="tasks-sort-button">Дата: по возрастанию</button>
+          <button onclick="todoSort()" id="tasks-sort-button">
+            Сортировка по дате
+          </button>
         </div>
       </div>
       <h2>СПИСОК ЗАДАЧ</h2>

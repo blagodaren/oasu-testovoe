@@ -54,7 +54,8 @@ body {
 .add-todo-input input,
 .todo-priority select,
 .add-todo-button button,
-#tasks-sort-button {
+#tasks-sort-button,
+#task-description-change {
   font-family: inherit;
   font-weight: 400;
   line-height: 1.5;
@@ -69,6 +70,12 @@ body {
   width: 30vw;
   height: 33px;
   padding-left: 10px;
+}
+
+#task-description-change {
+  width: 35vw;
+  height: 20px;
+  padding-left: 5px;
 }
 
 .todo-menu {
@@ -170,9 +177,9 @@ body {
 }
 
 .todo-card-date {
-  line-height: 2;
+  line-height: 1;
 }
 
-.checked {
-  background-color: black;
+.description-change:nth-child(2) input {
+  color: white;
 }

@@ -8,19 +8,34 @@ const completedFilter = document.getElementById("checkbox-completed");
 const highFilter = document.getElementById("checkbox-high");
 const mediumFilter = document.getElementById("checkbox-medium");
 const lowFilter = document.getElementById("checkbox-low");
-
-let completedFlag = true;
-let highFlag = true;
-let mediumFlag = true;
-let lowFlag = true;
+const requestURL = "http://127.0.0.1:3000/items";
+const xhr = new XMLHttpRequest();
 
 let tasks;
+let copyTasks = [];
+let priorities;
 
 !localStorage.tasks
   ? (tasks = [])
   : (tasks = JSON.parse(localStorage.getItem("tasks")));
 
-let copyTasks = [];
+!localStorage.priorities
+  ? (priorities = [])
+  : (priorities = JSON.parse(localStorage.getItem("priorities")));
+
+const updateServer = () => {
+  let json = JSON.stringify(tasks);
+  xhr.open("POST", requestURL);
+  xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+  xhr.send(json);
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+  localStorage.setItem("copyTasks", JSON.stringify(copyTasks));
+  localStorage.setItem("priorities", JSON.stringify(priorities));
+};
+
+const addToServer = () => {
+  xhr.open("POST", requestURL);
+};
 
 class Task {
   constructor(description, priority = "Low") {
@@ -28,6 +43,7 @@ class Task {
     this.done = false;
     this.priority = priority;
     this.date = new Date().toLocaleString();
+    this.dateDone = "";
   }
 }
 
@@ -36,10 +52,14 @@ const createTemplate = (task, index) => {
     <div class="todo-card">
         <div class="todo-info">
             <p class="todo-card-priority">${task.priority}</p>
-            <p class="todo-card-text">${task.description}</p>
+            <div class="todo-card-input">
+            <p onclick="changeDescription(${index})" class="todo-card-text">
+            ${task.description}</p>
+            </div>
             <p class="todo-card-date">Создано:
             ${task.date}
             </p>
+            ${task.done ? `<p class='todo-card-date'>${task.dateDone}</p>` : ""}
         </div>
         ${
           !task.done
@@ -80,39 +100,83 @@ fillTodoList();
 
 const todoDate = document.querySelector(".todo-card-date");
 
-const updateLocal = () => {
-  localStorage.setItem("tasks", JSON.stringify(tasks));
-  localStorage.setItem("copyTasks", JSON.stringify(copyTasks));
-};
-
 const completeTodo = (index) => {
-  tasks[index].date += `<br> Выполнено: ${new Date().toLocaleString()}`;
+  tasks[index].dateDone = `Выполнено: ${new Date().toLocaleString()}`;
   tasks[index].done = true;
-  updateLocal();
+  updateServer();
   fillTodoList();
 };
 
 const cancelTodo = (index) => {
-  tasks[index].date += `<br> Отменено: ${new Date().toLocaleString()}`;
+  tasks[index].dateDone = `Отменено: ${new Date().toLocaleString()}`;
   tasks[index].done = true;
-  updateLocal();
+  updateServer();
   fillTodoList();
 };
 
 const deleteTodo = (index) => {
   tasks.splice(index, 1);
-  updateLocal();
+  updateServer();
   fillTodoList();
+};
+let todoText = [];
+let changeInput = [];
+let changeInputs;
+
+const changeDescription = (index) => {
+  todoText = document.querySelectorAll(".todo-card-input");
+  tempIndex = index + 1;
+  todoText[index].innerHTML = `<input
+  type="text"
+  id="task-description-change"
+  class = "description-change"
+  placeholder="Введите задачу..."
+/>
+<button onclick="saveDescription(${index})" class="fa fa-check fa-lg" id="done-task-button"></button>
+`;
+  changeInputs = document.querySelectorAll(".description-change");
+};
+
+const saveDescription = (index) => {
+  tasks[index].description = changeInputs[index].value;
+  todoText[
+    index
+  ].innerHTML = `<p onclick="changeDescription(${index})" class="todo-card-text">
+  ${tasks[index].description}</p>`;
+  updateServer();
 };
 
 addTodoBtn.addEventListener("click", () => {
   if (todoInput.value) {
-    tasks.push(new Task(todoInput.value, todoPriority.value));
-    updateLocal();
+    curentTask = new Task(todoInput.value, todoPriority.value);
+    tasks.push(curentTask);
+    addToServer(curentTask);
     fillTodoList();
+    filterTodoList();
     todoInput.value = "";
   }
 });
+
+const filterTodoCopy = (priority, flag) => {
+  if (flag) {
+    copyTasks = copyTasks.concat(
+      tasks.filter((item, index) => {
+        return tasks[index].priority == priority && tasks[index].done == false;
+      })
+    );
+  }
+};
+
+const isAllCheckBoxChecked = () => {
+  if (
+    completedFilter.checked &&
+    highFilter.checked &&
+    mediumFilter.checked &&
+    lowFilter.checked
+  ) {
+    copyTasks = tasks;
+  }
+};
 
 const filterTodoList = () => {
   copyTasks = [];
@@ -123,27 +187,49 @@ const filterTodoList = () => {
       })
     );
   }
-  if (highFilter.checked) {
-    copyTasks = copyTasks.concat(
-      tasks.filter((item, index) => {
-        return tasks[index].priority == "High" && tasks[index].done == false;
-      })
-    );
-  }
-  if (mediumFilter.checked) {
-    copyTasks = copyTasks.concat(
-      tasks.filter((item, index) => {
-        return tasks[index].priority == "Medium" && tasks[index].done == false;
-      })
-    );
-  }
-  if (lowFilter.checked) {
-    copyTasks = copyTasks.concat(
-      tasks.filter((item, index) => {
-        return tasks[index].priority == "Low" && tasks[index].done == false;
-      })
-    );
-  }
-  updateLocal();
+  filterTodoCopy("High", highFilter.checked);
+  filterTodoCopy("Medium", mediumFilter.checked);
+  filterTodoCopy("Low", lowFilter.checked);
+  isAllCheckBoxChecked();
+  updateServer();
   fillTodoList();
+};
+
+sortFlag = true;
+
+const todoSort = () => {
+  if (sortFlag) {
+    if (copyTasks.length == 0) {
+      tasks.sort(function (a, b) {
+        let dateA = new Date(a.date).getTime();
+        let dateB = new Date(b.date).getTime();
+        return dateA < dateB ? 1 : -1;
+      });
+      fillTodoList();
+    } else {
+      copyTasks.sort(function (a, b) {
+        let dateA = new Date(a.date).getTime();
+        let dateB = new Date(b.date).getTime();
+        return dateA < dateB ? 1 : -1;
+      });
+      fillTodoList();
+    }
+  } else {
+    if (copyTasks.length == 0) {
+      tasks.sort(function (a, b) {
+        let dateA = new Date(a.date).getTime();
+        let dateB = new Date(b.date).getTime();
+        return dateA > dateB ? 1 : -1;
+      });
+      fillTodoList();
+    } else {
+      copyTasks.sort(function (a, b) {
+        let dateA = new Date(a.date).getTime();
+        let dateB = new Date(b.date).getTime();
+        return dateA > dateB ? 1 : -1;
+      });
+      fillTodoList();
+    }
+  }
+  sortFlag = !sortFlag;
 };
