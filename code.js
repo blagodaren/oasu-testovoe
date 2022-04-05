@@ -9,33 +9,22 @@ const highFilter = document.getElementById("checkbox-high");
 const mediumFilter = document.getElementById("checkbox-medium");
 const lowFilter = document.getElementById("checkbox-low");
 const requestURL = "http://127.0.0.1:3000/items";
+const deleteURL = "http://127.0.0.1:3000/items/:itemId";
 const xhr = new XMLHttpRequest();
 
 let tasks;
 let copyTasks = [];
-let priorities;
 
-!localStorage.tasks
-  ? (tasks = [])
-  : (tasks = JSON.parse(localStorage.getItem("tasks")));
-
-!localStorage.priorities
-  ? (priorities = [])
-  : (priorities = JSON.parse(localStorage.getItem("priorities")));
-
-const updateServer = () => {
-  let json = JSON.stringify(tasks);
-  xhr.open("POST", requestURL);
-  xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
-  xhr.send(json);
-  localStorage.setItem("tasks", JSON.stringify(tasks));
-  localStorage.setItem("copyTasks", JSON.stringify(copyTasks));
-  localStorage.setItem("priorities", JSON.stringify(priorities));
-};
-
-const addToServer = () => {
-  xhr.open("POST", requestURL);
-};
+serverInit();
+// const localStorage = () => {
+//   let json = JSON.stringify(tasks);
+//   xhr.open("POST", requestURL);
+//   xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+//   xhr.send(json);
+//   localStorage.setItem("tasks", JSON.stringify(tasks));
+//   localStorage.setItem("copyTasks", JSON.stringify(copyTasks));
+//   localStorage.setItem("priorities", JSON.stringify(priorities));
+// };
 
 class Task {
   constructor(description, priority = "Low") {
@@ -80,7 +69,7 @@ const createTemplate = (task, index) => {
 const fillTodoList = () => {
   todosList.innerHTML = "";
   if (
-    tasks.length > 0 &&
+    tasks &&
     completedFilter.checked &&
     highFilter.checked &&
     mediumFilter.checked &&
@@ -99,26 +88,41 @@ const fillTodoList = () => {
 fillTodoList();
 
 const todoDate = document.querySelector(".todo-card-date");
+let taskId;
 
 const completeTodo = (index) => {
-  tasks[index].dateDone = `Выполнено: ${new Date().toLocaleString()}`;
-  tasks[index].done = true;
-  updateServer();
-  fillTodoList();
+  taskId = copyTasks[index].id;
+  copyTasks[index].dateDone = `Отменено: ${new Date().toLocaleString()}`;
+  copyTasks[index].done = true;
+  tasks.forEach((task, index) => {
+    if (task.id == taskId) {
+      task.dateDone = `Отменено: ${new Date().toLocaleString()}`;
+      task.done = true;
+    }
+  });
+  changeOnServer(taskId);
 };
 
 const cancelTodo = (index) => {
-  tasks[index].dateDone = `Отменено: ${new Date().toLocaleString()}`;
-  tasks[index].done = true;
-  updateServer();
-  fillTodoList();
+  taskId = copyTasks[index].id;
+  copyTasks[index].dateDone = `Отменено: ${new Date().toLocaleString()}`;
+  copyTasks[index].done = true;
+  tasks.forEach((task, index) => {
+    if (task.id == taskId) {
+      task.dateDone = `Отменено: ${new Date().toLocaleString()}`;
+      task.done = true;
+    }
+  });
+  changeOnServer(taskId - 1);
 };
 
 const deleteTodo = (index) => {
-  tasks.splice(index, 1);
-  updateServer();
-  fillTodoList();
+  taskId = copyTasks[index].id;
+  copyTasks.splice(index, 1);
+  deleteOnServer(taskId);
+  serverInit();
 };
+
 let todoText = [];
 let changeInput = [];
 let changeInputs;
@@ -191,7 +195,6 @@ const filterTodoList = () => {
   filterTodoCopy("Medium", mediumFilter.checked);
   filterTodoCopy("Low", lowFilter.checked);
   isAllCheckBoxChecked();
-  updateServer();
   fillTodoList();
 };
 
@@ -232,4 +235,49 @@ const todoSort = () => {
     }
   }
   sortFlag = !sortFlag;
+};
+
+function serverInit() {
+  fetch(requestURL)
+    .then((response) => response.json())
+    .then((json) => {
+      tasks = json;
+      fillTodoList();
+      copyTasks = tasks;
+    })
+    .catch((error) => console.error(error));
+}
+
+const addToServer = (task) => {
+  fetch(requestURL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json;charset=utf-8",
+    },
+    body: JSON.stringify(task),
+  });
+  serverInit();
+};
+
+const deleteOnServer = (index) => {
+  fetch(deleteURL, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json;charset=utf-8",
+    },
+    body: JSON.stringify(tasks[index + 1]),
+  });
+  filterTodoList();
+  serverInit();
+};
+
+const changeOnServer = (index) => {
+  fetch(deleteURL, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json;charset=utf-8",
+    },
+    body: JSON.stringify(tasks[index + 1]),
+  });
+  serverInit();
 };
