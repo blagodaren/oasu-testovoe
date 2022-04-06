@@ -15,6 +15,7 @@ const xhr = new XMLHttpRequest();
 let tasks;
 let copyTasks = [];
 let changeData;
+let taskId;
 
 updateServer();
 
@@ -34,7 +35,9 @@ const createTemplate = (task, index) => {
         <div class="todo-info">
             <p class="todo-card-priority">${task.priority}</p>
             <div class="todo-card-input">
-            <p onclick="changeDescription(${index})" class="todo-card-text">
+            <p onclick="changeDescription(${index}, ${
+    task.id
+  })" class="todo-card-text">
             ${task.description}</p>
             </div>
             <p class="todo-card-date">Создано:
@@ -58,8 +61,6 @@ const createTemplate = (task, index) => {
     `;
 };
 
-// tasks.find(task => task.id === index + 1).id
-
 const fillTodoList = () => {
   todosList.innerHTML = "";
   if (
@@ -72,6 +73,7 @@ const fillTodoList = () => {
     tasks.forEach((item, index) => {
       todosList.innerHTML += createTemplate(item, index);
     });
+    copyTasks = tasks;
   } else {
     copyTasks.forEach((item, index) => {
       todosList.innerHTML += createTemplate(item, index);
@@ -81,11 +83,11 @@ const fillTodoList = () => {
 
 fillTodoList();
 
-const todoDate = document.querySelector(".todo-card-date");
-let taskId;
-
 const completeTodo = (taskId) => {
   changeData = tasks.filter((item) => item.id === taskId);
+  index = copyTasks.findIndex((item) => item.id === taskId);
+  copyTasks[index].dateDone = `Выполнено: ${new Date().toLocaleString()}`;
+  copyTasks[index].done = true;
   changeData[0].dateDone = `Выполнено: ${new Date().toLocaleString()}`;
   changeData[0].done = true;
   changeOnServer(changeData);
@@ -93,130 +95,111 @@ const completeTodo = (taskId) => {
 
 const cancelTodo = (taskId) => {
   changeData = tasks.filter((item) => item.id === taskId);
+  index = copyTasks.findIndex((item) => item.id === taskId);
+  copyTasks[index].dateDone = `Отменено: ${new Date().toLocaleString()}`;
+  copyTasks[index].done = true;
   changeData[0].dateDone = `Отменено: ${new Date().toLocaleString()}`;
   changeData[0].done = true;
   changeOnServer(changeData);
 };
 
 const deleteTodo = (taskId) => {
-  console.log(taskId);
+  debugger;
+  index = copyTasks.findIndex((item) => item.id === taskId);
   changeData = tasks.filter((item) => item.id === taskId);
-  console.log(changeData[0].id);
+  copyTasks.splice(index, 1);
   deleteOnServer(changeData);
 };
 
 let todoText = [];
 let changeInput = [];
-let changeInputs;
 
-const changeDescription = (index) => {
+const changeDescription = (index, taskId) => {
   todoText = document.querySelectorAll(".todo-card-input");
-  tempIndex = index + 1;
   todoText[index].innerHTML = `<input
   type="text"
-  id="task-description-change"
+  id="task-description-change${taskId}"
   class = "description-change"
   placeholder="Введите задачу..."
 />
-<button onclick="saveDescription(${index})" class="fa fa-check fa-lg" id="done-task-button"></button>
+<button onclick="saveDescription(${index}, ${taskId})" class="fa fa-check fa-lg" id="done-task-button"></button>
 `;
-  changeInputs = document.querySelectorAll(".description-change");
+  changeInput[taskId] = document.getElementById(
+    `task-description-change${taskId}`
+  );
 };
 
-const saveDescription = (index) => {
-  tasks[index].description = changeInputs[index].value;
-  todoText[
-    index
-  ].innerHTML = `<p onclick="changeDescription(${index})" class="todo-card-text">
-  ${tasks[index].description}</p>`;
-  updateServer();
+const saveDescription = (index, taskId) => {
+  changeData = tasks.filter((item) => item.id === taskId);
+  if (changeInput[taskId].value) {
+    changeData[0].description = changeInput[taskId].value;
+    changeOnServer(changeData);
+  }
 };
 
 addTodoBtn.addEventListener("click", () => {
   if (todoInput.value) {
     curentTask = new Task(todoInput.value, todoPriority.value);
-
     addToServer(curentTask);
-    fillTodoList();
-    filterTodoList();
     todoInput.value = "";
   }
 });
 
-const filterTodoCopy = (priority, flag) => {
-  if (flag) {
+const filterTodoList = () => {
+  copyTasks = [];
+  if (completedFilter.checked)
+    copyTasks = copyTasks.concat(tasks.filter((item) => item.done == true));
+  if (highFilter.checked)
     copyTasks = copyTasks.concat(
-      tasks.filter((item, index) => {
-        return tasks[index].priority == priority && tasks[index].done == false;
-      })
+      tasks.filter((item) => item.priority == "High" && item.done == false)
     );
-  }
+  if (mediumFilter.checked)
+    copyTasks = copyTasks.concat(
+      tasks.filter((item) => item.priority == "Medium" && item.done == false)
+    );
+  if (lowFilter.checked)
+    copyTasks = copyTasks.concat(
+      tasks.filter((item) => item.priority == "Low" && item.done == false)
+    );
+  fillTodoList();
 };
 
-const isAllCheckBoxChecked = () => {
+const todoSortDown = () => {
   if (
+    tasks &&
     completedFilter.checked &&
     highFilter.checked &&
     mediumFilter.checked &&
     lowFilter.checked
   ) {
-    copyTasks = tasks;
+    tasks.sort(function (a, b) {
+      return new Date(b.date) - new Date(a.date);
+    });
+  } else {
+    copyTasks.sort(function (a, b) {
+      return new Date(b.date) - new Date(a.date);
+    });
   }
-};
-
-const filterTodoList = () => {
-  copyTasks = [];
-  if (completedFilter.checked) {
-    copyTasks = copyTasks.concat(
-      tasks.filter((item, index) => {
-        return tasks[index].done == true;
-      })
-    );
-  }
-  filterTodoCopy("High", highFilter.checked);
-  filterTodoCopy("Medium", mediumFilter.checked);
-  filterTodoCopy("Low", lowFilter.checked);
-  isAllCheckBoxChecked();
   fillTodoList();
 };
 
-sortFlag = true;
-
-const todoSort = () => {
-  if (sortFlag) {
-    if (copyTasks.length == 0) {
-      tasks.sort(function (a, b) {
-        let dateA = new Date(a.date).getTime();
-        let dateB = new Date(b.date).getTime();
-        return dateA < dateB ? 1 : -1;
-      });
-      fillTodoList();
-    } else {
-      copyTasks.sort(function (a, b) {
-        let dateA = new Date(a.date).getTime();
-        let dateB = new Date(b.date).getTime();
-        return dateA < dateB ? 1 : -1;
-      });
-      fillTodoList();
-    }
+const todoSortUp = () => {
+  if (
+    tasks &&
+    completedFilter.checked &&
+    highFilter.checked &&
+    mediumFilter.checked &&
+    lowFilter.checked
+  ) {
+    tasks.sort(function (a, b) {
+      return new Date(a.date) - new Date(b.date);
+    });
   } else {
-    if (copyTasks.length == 0) {
-      tasks.sort(function (a, b) {
-        let dateA = new Date(a.date).getTime();
-        let dateB = new Date(b.date).getTime();
-        return dateA > dateB ? 1 : -1;
-      });
-      fillTodoList();
-    } else {
-      copyTasks.sort(function (a, b) {
-        let dateA = new Date(a.date).getTime();
-        let dateB = new Date(b.date).getTime();
-        return dateA > dateB ? 1 : -1;
-      });
-      fillTodoList();
-    }
+    copyTasks.sort(function (a, b) {
+      return new Date(a.date) - new Date(b.date);
+    });
   }
-  sortFlag = !sortFlag;
+  fillTodoList();
 };
 
 function updateServer() {
@@ -238,18 +221,21 @@ const addToServer = (task) => {
     body: JSON.stringify(task),
   });
   updateServer();
+  fillTodoList();
+  filterTodoList();
 };
 
 const deleteOnServer = (data) => {
-  console.log(data[0].id);
   fetch(deleteURL + `${data[0].id}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json;charset=utf-8",
     },
   });
-  filterTodoList();
   updateServer();
+  sleep(2000);
+  filterTodoList();
+  fillTodoList();
 };
 
 const changeOnServer = (changeData) => {
@@ -261,4 +247,7 @@ const changeOnServer = (changeData) => {
     body: JSON.stringify(changeData[0]),
   });
   updateServer();
+  sleep(2000);
+  filterTodoList();
+  fillTodoList();
 };
