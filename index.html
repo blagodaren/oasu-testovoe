@@ -6,47 +6,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="./style.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
     />
-
-    <script language="javascript" type="text/javascript">
-      let d = new Date();
-      let day = new Array(
-        "Воскресенье",
-        "Понедельник",
-        "Вторник",
-        "Среда",
-        "Четверг",
-        "Пятница",
-        "Суббота"
-      );
-      let month = new Array(
-        "января",
-        "февраля",
-        "марта",
-        "апреля",
-        "мая",
-        "июня",
-        "июля",
-        "августа",
-        "сентября",
-        "октября",
-        "ноября",
-        "декабря"
-      );
-      let TODAY =
-        day[d.getDay()] +
-        " " +
-        d.getDate() +
-        " " +
-        month[d.getMonth()] +
-        " " +
-        d.getFullYear() +
-        " г.";
-    </script>
   </head>
 
   <body>
@@ -74,54 +38,56 @@
         <div class="add-todo-properties">
           <ul class="todo-filters">
             <li class="todo-filter">
-              <input class="checkbox" type="checkbox" id="checkbox-completed" />
+              <input
+                onclick="filterTodoList()"
+                class="checkbox"
+                type="checkbox"
+                id="checkbox-completed"
+                checked="checked"
+              />
               <label for="checkbox-label">Completed</label>
             </li>
             <li class="todo-filter">
-              <input class="checkbox" type="checkbox" id="checkbox-1" />
+              <input
+                onclick="filterTodoList()"
+                class="checkbox"
+                type="checkbox"
+                id="checkbox-high"
+                checked="checked"
+              />
               <label for="checkbox-label">High</label>
             </li>
             <li class="todo-filter">
-              <input class="checkbox" type="checkbox" id="checkbox-1" />
+              <input
+                onclick="filterTodoList()"
+                class="checkbox"
+                type="checkbox"
+                id="checkbox-medium"
+                checked="checked"
+              />
               <label for="checkbox-label">Medium</label>
             </li>
             <li class="todo-filter">
-              <input class="checkbox" type="checkbox" id="checkbox-1" />
+              <input
+                onclick="filterTodoList()"
+                class="checkbox"
+                type="checkbox"
+                id="checkbox-low"
+                checked="checked"
+              />
               <label for="checkbox-label">Low</label>
             </li>
           </ul>
         </div>
         <div class="tasks-sort">
-          <button id="tasks-sort-button">Дата: по возрастанию</button>
+          <button onclick="todoSort()" id="tasks-sort-button">
+            Сортировка по дате
+          </button>
         </div>
       </div>
       <h2>СПИСОК ЗАДАЧ</h2>
-      <div class="todos-wrapper">
-        <ul class="todos-list">
-          <li class="todo-card">
-            <div class="todo-info">
-              <p class="todo-card-priority">High</p>
-              <p class="todo-card-text">Сделать английский язык</p>
-              <p class="todo-card-date">
-                <script language="javascript" type="text/javascript">
-                  document.write(TODAY);
-                </script>
-              </p>
-            </div>
-            <div class="todo-buttons">
-              <button class="fa fa-check fa-lg" id="done-task-button"></button>
-              <button
-                class="fa fa-times fa-lg"
-                id="delete-task-button"
-              ></button>
-              <button
-                class="fa fa-trash fa-lg"
-                id="cancel-task-button"
-              ></button>
-            </div>
-          </li>
-        </ul>
-      </div>
+      <div class="todos-wrapper"></div>
     </div>
+    <script src="./code.js"></script>
   </body>
 </html>
